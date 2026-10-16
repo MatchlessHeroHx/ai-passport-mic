@@ -11,6 +11,10 @@ usage() {
 run_static_checks() {
     local actionlint_bin
     local test_dir
+    local gc_sections_flag="-Wl,--gc-sections"
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+        gc_sections_flag="-Wl,-dead_strip"
+    fi
 
     python3 tools/check_repo.py
 
@@ -28,6 +32,22 @@ run_static_checks() {
         tests/test_ui_pixel_math.c main/ui_pixel_math.c \
         -o "${test_dir}/test_ui_pixel_math"
     "${test_dir}/test_ui_pixel_math"
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain \
+        tests/test_mic_protocol.c main/mic_protocol.c \
+        -o "${test_dir}/test_mic_protocol"
+    "${test_dir}/test_mic_protocol" "${test_dir}/mic-wire.bin"
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain \
+        tests/test_mic_adpcm.c main/mic_adpcm.c -o "${test_dir}/test_mic_adpcm"
+    "${test_dir}/test_mic_adpcm" "${test_dir}/mic-adpcm.bin"
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain \
+        tests/test_mic_clips.c main/mic_clips.c -o "${test_dir}/test_mic_clips"
+    "${test_dir}/test_mic_clips" assets/images/mic_clips.bin
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain \
+        tests/test_mic_screen.c main/mic_screen.c -o "${test_dir}/test_mic_screen"
+    "${test_dir}/test_mic_screen"
+    PYTHONDONTWRITEBYTECODE=1 python3 tests/test_mic_adpcm.py "${test_dir}/mic-adpcm.bin"
+    PYTHONDONTWRITEBYTECODE=1 python3 tests/test_mic_bridge.py "${test_dir}/mic-wire.bin"
+    PYTHONDONTWRITEBYTECODE=1 python3 tests/test_mic_menubar.py
     "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain \
         tests/test_demo_navigation.c main/demo_navigation.c \
         -o "${test_dir}/test_demo_navigation"
@@ -60,7 +80,7 @@ run_static_checks() {
     for demo in audio low_power ble wifi; do
         "${CC:-cc}" -std=c11 -Wall -Wextra -Werror \
             -ffunction-sections -fdata-sections -Itests/demo_stubs -Imain \
-            "tests/test_demo_${demo}_runtime.c" -Wl,--gc-sections \
+            "tests/test_demo_${demo}_runtime.c" "${gc_sections_flag}" \
             -o "${test_dir}/test_demo_${demo}_runtime"
         "${test_dir}/test_demo_${demo}_runtime"
     done

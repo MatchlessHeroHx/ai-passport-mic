@@ -240,6 +240,13 @@ void bsp_display_backlight(uint8_t percent) {
     ledc_update_duty(BSP_BL_LEDC_MODE, BSP_BL_LEDC_CHANNEL);
 }
 
+esp_err_t bsp_display_set_on(bool on) {
+    if (!s_ready || !s_panel) return ESP_ERR_INVALID_STATE;
+    esp_err_t e = esp_lcd_panel_disp_on_off(s_panel, on);
+    if (e != ESP_OK) ESP_LOGE(TAG, "ST7789 %s 失败: %s", on ? "DISPON" : "DISPOFF", esp_err_to_name(e));
+    return e;
+}
+
 esp_err_t bsp_display_prepare_deep_sleep(void) {
     esp_err_t first_error = ESP_OK;
     if (!s_ready || !s_panel) {
