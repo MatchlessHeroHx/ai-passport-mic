@@ -165,7 +165,6 @@ class VendoredDocumentationTest(unittest.TestCase):
             patch.object(CHECKS, "git_files", return_value=files),
             patch.object(CHECKS, "check_required_files"),
             patch.object(CHECKS, "check_action_pins"),
-            patch.object(CHECKS, "check_issue_forms"),
             contextlib.redirect_stderr(io.StringIO()) as output,
         ):
             self.assertEqual(CHECKS.text_files(), files)
@@ -330,7 +329,6 @@ class CommunityDocumentLinksTest(unittest.TestCase):
             patch.object(CHECKS, "git_files", return_value=[page]),
             patch.object(CHECKS, "check_required_files"),
             patch.object(CHECKS, "check_action_pins"),
-            patch.object(CHECKS, "check_issue_forms"),
             contextlib.redirect_stderr(io.StringIO()) as output,
         ):
             self.assertEqual(CHECKS.main(), 1)

@@ -209,7 +209,7 @@ The default custom-firmware baseline uses 8 MB Flash. `sdkconfig.defaults` fixes
 
 Writing the merged image at `0x0` may reset NVS because gaps are padded in the
 single file. Use segmented `idf.py flash` when stored application state must be
-preserved. See the [firmware layout](../development/engineering/firmware-layout.md).
+preserved. See the [firmware layout](https://github.com/FoloToy/ai-passport/blob/main/docs/development/engineering/firmware-layout.md).
 
 The console is USB Serial/JTAG. Do not switch to the UART0 default output without resolving its GPIO21 conflict with the backlight.
 
@@ -225,7 +225,7 @@ Menu initialization status arrays implicitly follow `DEMOS[]` order; update and 
 
 ## 12. Development environment
 
-Follow the canonical [environment bootstrap](../development/engineering/environment-setup.md)
+Follow the canonical [environment bootstrap](https://github.com/FoloToy/ai-passport/blob/main/docs/development/engineering/environment-setup.md)
 for clean-machine installation, OS-specific prerequisites, and international or
 mainland China download routes. Use ESP-IDF 5.5.3 outside the repository,
 activate its `export.sh` in every terminal, and confirm the exact version.
@@ -266,7 +266,7 @@ General board acceptance:
 
 The menu operations, page names, and timings below are baseline hardware-test
 examples, not a required application UI. Derivative applications must follow the
-[mandatory UI redesign rule](../development/ai-guide.md#mandatory-ui-redesign-for-derivative-applications)
+[mandatory UI redesign rule](https://github.com/FoloToy/ai-passport/blob/main/docs/development/ai-guide.md#mandatory-ui-redesign-for-derivative-applications)
 and exercise the relevant hardware checks through their own flows; do not retain
 the demo test UI just to follow these examples.
 

@@ -30,10 +30,6 @@
 
 | 文件 | 尺寸与格式 | 用途与来源 |
 | --- | --- | --- |
-| [`images/home.jpg`](images/home.jpg) | 3840 × 2160，JPEG | 嵌入中英文项目 README 的产品主图，突出 AI Passport 产品形象与开放、人人可创作的理念。 |
-| [`images/readme-hardware-specs.png`](images/readme-hardware-specs.png) | 2172 × 724，PNG RGBA | 保留为可选技术参考图，不再用于首页主视觉。于 2026-09-17 使用内置图像生成工具为本仓库生成；已根据文档中的硬件能力契约核对图中的六项标签与参数。 |
-| [`images/logo-wordmark.png`](images/logo-wordmark.png) | 1648 × 336，PNG RGBA | 从仓库原始 `images/logo.png` 中精确裁切并去除背景的黑色字标；用于中英文项目 README 的浅色主题。 |
-| [`images/logo-wordmark-dark.png`](images/logo-wordmark-dark.png) | 1648 × 336，PNG RGBA | 提取字标的白色版本；README 使用 `<picture>` 在 GitHub 深色主题下显示。 |
 | [`images/mic-character.png`](images/mic-character.png) | 1199 × 1312，PNG RGB | 麦克风界面伙伴的原始形象，由项目负责人提供；生成视频时用作首帧。 |
 | [`images/mic-character-1x1.png`](images/mic-character-1x1.png) | 1199 × 1199，PNG RGB | 原图顶部对齐的正方形裁切，用于 1:1 图生视频。 |
 | [`images/mic_clips.bin`](images/mic_clips.bin) | 240 × 240 RGB565 图块，约 4.9 MB | 伙伴动画包，由 `tools/generate_mic_clips.py` 从负责人生成的 `VIDEO/` 视频（待机、倾听、点头）构建，由 `main/CMakeLists.txt` 嵌入。`images/mic-clips-preview.png` 是预览图。 |

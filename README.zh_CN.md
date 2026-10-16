@@ -56,7 +56,8 @@ AI Passport  ── BLE（16 kHz IMA ADPCM，已绑定）──▶  Mac 菜单�
 
 - [Passport Mic 说明](docs/passport-mic.zh_CN.md)：行为、协议、电量记录和验证。
 - [固件文案](docs/firmware-copy.zh_CN.md)：屏幕上的全部文字。
-- [上游平台文档](docs/README.zh_CN.md)：本项目所基于的 FoloToy AI Passport 平台。
+- [硬件开发指南](docs/hardware-design/AI_HARDWARE_DEVELOPMENT_GUIDE.zh_CN.md)：开发板的引脚、外设和 BSP 约定。
+- [FoloToy AI Passport](https://github.com/FoloToy/ai-passport)：本项目所基于的上游平台。
 
 ## 许可证
 

@@ -64,7 +64,8 @@ starts dictation at once; UP/DOWN only wake it.
 
 - [Passport Mic guide](docs/passport-mic.md): behavior, protocol, battery logging and verification.
 - [Firmware copy](docs/firmware-copy.md): every on-screen string.
-- [Upstream platform docs](docs/README.md): the FoloToy AI Passport base this project builds on.
+- [Hardware guide](docs/hardware-design/AI_HARDWARE_DEVELOPMENT_GUIDE.md): pins, peripherals and BSP contracts of the board.
+- [FoloToy AI Passport](https://github.com/FoloToy/ai-passport): the upstream platform this project builds on.
 
 ## License
 

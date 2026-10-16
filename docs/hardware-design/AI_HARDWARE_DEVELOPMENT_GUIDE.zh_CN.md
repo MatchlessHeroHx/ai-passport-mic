@@ -259,7 +259,7 @@ SOC 准确度取决于电芯与 profile 的匹配程度。本驱动给出的是�
 默认自定义固件基线使用 8 MB Flash。`sdkconfig.defaults` 固定使用 8 MB Flash 镜像配置，并关闭 `CONFIG_ESPTOOLPY_HEADER_FLASHSIZE_UPDATE`（不按探测容量回写镜像头，便于 `idf.py merge-bin`）；默认 `partitions.csv` 只提供 24 KB NVS、4 KB PHY data，以及从 `0x10000` 延伸到 Flash 末尾的 factory app（大小 `0x7F0000`）。它没有 OTA、设备身份或未使用的预留分区。用户固件可以把它替换成其它合法的 8 MB 分区布局。若实机探测结果不是 8 MB，则该设备不符合当前硬件基线；修改项目默认值前应先确认板卡和 Flash 料号。
 
 从 `0x0` 写入合并镜像时，单文件中的间隙填充可能重置 NVS。需要保留已存应用
-状态时，应使用分段 `idf.py flash`。详见[固件布局](../development/engineering/firmware-layout.zh_CN.md)。
+状态时，应使用分段 `idf.py flash`。详见[固件布局](https://github.com/FoloToy/ai-passport/blob/main/docs/development/engineering/firmware-layout.zh_CN.md)。
 
 控制台固定为 USB Serial/JTAG，不使用 UART0 默认输出，因为其 TX GPIO21 与背光冲突。任何日志接口修改都必须同时检查引脚占用。
 
@@ -298,7 +298,7 @@ SOC 准确度取决于电芯与 profile 的匹配程度。本驱动给出的是�
 ## 12. 开发环境搭建
 
 全新机器安装、各操作系统依赖以及国际/中国大陆下载线路统一以
-[环境引导](../development/engineering/environment-setup.zh_CN.md)为准。项目严格使用
+[环境引导](https://github.com/FoloToy/ai-passport/blob/main/docs/development/engineering/environment-setup.zh_CN.md)为准。项目严格使用
 **ESP-IDF 5.5.3**。不要直接使用系统中的任意 `idf.py`，也不要将 Arduino、
 PlatformIO 或其他 ESP-IDF 版本生成的配置混入当前工程。
 编译优先使用 `./tools/validate.sh --firmware` 生成并验证合并固件，烧录优先把该
@@ -448,7 +448,7 @@ idf.py flash monitor
 ### 按修改类型追加验收
 
 下表中的菜单操作、页面名称和时长是基线硬件测试示例，不是应用必须沿用的 UI。
-二次开发应用必须遵守[强制 UI 重新设计规则](../development/ai-guide.zh_CN.md#二次开发-ui-强制重新设计)，
+二次开发应用必须遵守[强制 UI 重新设计规则](https://github.com/FoloToy/ai-passport/blob/main/docs/development/ai-guide.zh_CN.md#二次开发-ui-强制重新设计)，
 通过自身流程完成适用的硬件检查，不得为了照做测试示例而保留 demo 测试 UI。
 
 | 修改类型 | 必须观察的实机结果 |

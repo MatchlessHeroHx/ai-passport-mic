@@ -27,10 +27,6 @@ SECRET_PATTERNS = {
     "private key": re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
 }
 ROOT_MARKDOWN_ALLOWLIST = {
-    "AGENTS.md",
-    "AGENTS.zh_CN.md",
-    "CLAUDE.md",
-    "CLAUDE.zh_CN.md",
     "README.md",
     "README.zh_CN.md",
 }
@@ -105,19 +101,13 @@ def text_files() -> list[Path]:
 
 def check_required_files(errors: list[str]) -> None:
     required = (
-        "AGENTS.md",
-        "AGENTS.zh_CN.md",
-        "CLAUDE.md",
-        "CLAUDE.zh_CN.md",
-        "docs/CHANGELOG.md",
-        ".github/CONTRIBUTING.md",
-        ".github/CODE_OF_CONDUCT.md",
-        ".github/SECURITY.md",
-        ".github/SUPPORT.md",
+        "README.md",
+        "README.zh_CN.md",
+        "LICENSE",
+        "docs/passport-mic.md",
         "dependencies.lock",
         "sdkconfig.defaults",
         "partitions.csv",
-        ".github/PULL_REQUEST_TEMPLATE.md",
     )
     for name in required:
         if not (ROOT / name).is_file():
@@ -129,8 +119,9 @@ def check_required_files(errors: list[str]) -> None:
     if ignored.returncode == 0:
         errors.append("dependencies.lock must be tracked, not ignored")
 
+    published = set(git_files())  # Ignored local copies are not part of the repository.
     for path in sorted(ROOT.glob("*.md")):
-        if path.name not in ROOT_MARKDOWN_ALLOWLIST:
+        if path in published and path.name not in ROOT_MARKDOWN_ALLOWLIST:
             errors.append(
                 f"{path.name}: root Markdown must move to docs/ or .github/"
             )
@@ -269,19 +260,6 @@ def check_action_pins(errors: list[str]) -> None:
                 errors.append(f"{path.relative_to(ROOT)}:{line_number}: action must use a full commit SHA: {action}")
 
 
-def check_issue_forms(errors: list[str]) -> None:
-    issue_dir = ROOT / ".github" / "ISSUE_TEMPLATE"
-    for name in ("feature_request.yml", "usage_question.yml"):
-        path = issue_dir / name
-        if not path.is_file():
-            errors.append(f"missing issue form: {path.relative_to(ROOT)}")
-            continue
-        text = path.read_text(encoding="utf-8")
-        for field in ("name:", "description:", "body:"):
-            if not re.search(rf"(?m)^{re.escape(field)}", text):
-                errors.append(f"{path.relative_to(ROOT)}: missing top-level {field[:-1]}")
-
-
 def check_sensitive_content(files: list[Path], errors: list[str]) -> None:
     for path in files:
         text = path.read_text(encoding="utf-8")
@@ -310,7 +288,6 @@ def main() -> int:
     check_community_document_links(files, errors)
     check_document_languages(files, errors, vendored_roots)
     check_action_pins(errors)
-    check_issue_forms(errors)
     check_sensitive_content(files, errors)
     check_conflict_markers(files, errors)
 

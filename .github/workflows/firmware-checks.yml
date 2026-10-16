@@ -4,14 +4,12 @@ on:
   pull_request:
     paths-ignore:
       - "docs/**"
-      - "skills/**"
       - "*.md"
   push:
     branches:
       - main
     paths-ignore:
       - "docs/**"
-      - "skills/**"
       - "*.md"
   workflow_dispatch:
 

@@ -33,10 +33,6 @@ Store reusable source images and generated display assets in `images/`.
 
 | File | Dimensions and format | Use and source |
 | --- | --- | --- |
-| [`images/home.jpg`](images/home.jpg) | 3840 × 2160, JPEG | Product hero image embedded in both project README files to foreground AI Passport and its open, maker-oriented identity. |
-| [`images/readme-hardware-specs.png`](images/readme-hardware-specs.png) | 2172 × 724, PNG RGBA | Optional technical infographic retained as a reference asset; it is no longer used as the homepage hero. Generated for this repository with the built-in image generation tool on 2026-09-17; the six labels and values were checked against the documented hardware contract. |
-| [`images/logo-wordmark.png`](images/logo-wordmark.png) | 1648 × 336, PNG RGBA | Transparent black wordmark extracted from the repository's original `images/logo.png`; embedded in both project README files for light backgrounds. |
-| [`images/logo-wordmark-dark.png`](images/logo-wordmark-dark.png) | 1648 × 336, PNG RGBA | White version of the extracted wordmark, used by the README `<picture>` element when GitHub is in dark mode. |
 | [`images/mic-character.png`](images/mic-character.png) | 1199 × 1312, PNG RGB | Source art for the microphone UI companion, provided by the project owner; used as the first frame when generating the clips. |
 | [`images/mic-character-1x1.png`](images/mic-character-1x1.png) | 1199 × 1199, PNG RGB | Top-aligned square crop of the source art, for 1:1 image-to-video generation. |
 | [`images/mic_clips.bin`](images/mic_clips.bin) | 240 × 240 tiled RGB565, about 4.9 MB | Companion animation pack built by `tools/generate_mic_clips.py` from the owner's generated videos in `VIDEO/` (idle, listen, nod); embedded by `main/CMakeLists.txt`. `images/mic-clips-preview.png` is its review sheet. |
