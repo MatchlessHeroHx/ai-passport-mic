@@ -75,6 +75,20 @@ uint8_t mic_edit_action(const mic_model_t *m, bool undo) {
     return m->state == MIC_READY ? (undo ? MIC_UNDO : MIC_CONFIRM) : 0;
 }
 
+void mic_power_payload(uint8_t out[MIC_POWER_SIZE], int soc_q8, int mv,
+                       uint8_t state, uint8_t screen, bool usb) {
+    uint16_t soc = soc_q8 < 0 || soc_q8 > 100 * 256 ? 0xFFFF : (uint16_t)soc_q8;
+    uint16_t cell = mv < 0 || mv >= 0xFFFF ? 0xFFFF : (uint16_t)mv;
+    out[0] = (uint8_t)soc;
+    out[1] = (uint8_t)(soc >> 8);
+    out[2] = (uint8_t)cell;
+    out[3] = (uint8_t)(cell >> 8);
+    out[4] = state;
+    out[5] = screen;
+    out[6] = usb ? MIC_POWER_USB : 0;
+    out[7] = 0;
+}
+
 size_t mic_ble_payload_size(unsigned mtu) {
     if (mtu < 23) return 0;
     if (mtu > 247) mtu = 247;

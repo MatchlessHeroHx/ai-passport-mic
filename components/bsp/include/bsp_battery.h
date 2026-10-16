@@ -16,5 +16,8 @@ esp_err_t bsp_battery_sleep(void);
 // 剩余电量百分比 0..100;读失败返回 -1。
 int bsp_battery_soc(void);
 
+// 剩余电量,单位 1/256 %(高字节整数位,低字节小数位),用于记录耗电曲线;读失败返回 -1。
+int bsp_battery_soc_q8(void);
+
 // 电池电压 mV;读失败返回 -1。
 int bsp_battery_mv(void);

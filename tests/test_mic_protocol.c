@@ -37,6 +37,13 @@ int main(int argc, char **argv) {
     assert(mic_ble_payload_size(185) == 176);
     assert(mic_ble_payload_size(247) == 238);
     assert(mic_ble_payload_size(517) == 238);
+    uint8_t power[MIC_POWER_SIZE];
+    mic_power_payload(power, 83 * 256 + 128, 3912, MIC_READY, 2, true);
+    assert(memcmp(power, "\x80\x53\x48\x0f\x01\x02\x01\x00", MIC_POWER_SIZE) == 0);
+    mic_power_payload(power, -1, -1, 255, 0, false);
+    assert(memcmp(power, "\xff\xff\xff\xff\xff\x00\x00\x00", MIC_POWER_SIZE) == 0);
+    mic_power_payload(power, 101 * 256, 70000, MIC_OFFLINE, 0, false);
+    assert(power[0] == 0xff && power[1] == 0xff && power[2] == 0xff && power[3] == 0xff);
     uint8_t packet[MIC_HEADER_SIZE + MIC_PAYLOAD_MAX];
     uint8_t pcm[MIC_PAYLOAD_MAX];
     for (size_t i = 0; i < sizeof(pcm); ++i) pcm[i] = (uint8_t)i;

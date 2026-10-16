@@ -127,5 +127,52 @@ class BleTransportTests(unittest.TestCase):
         self.assertEqual(actions, ['toggle', 'toggle', 'undo', 'confirm'])
 
 
+class PowerReportTests(unittest.TestCase):
+    def test_power_frame_matches_the_firmware_layout(self):
+        from protocol import POWER, parse_power
+        payload = b'\x80\x53\x48\x0f\x01\x02\x01\x00'  # tests/test_mic_protocol.c
+        self.assertEqual(Decoder().feed(frame(POWER, 3, payload)), [(POWER, 3, payload)])
+        self.assertEqual(parse_power(payload), {'soc': 83.5, 'mv': 3912, 'state': 'ready',
+                                                'screen': 'off', 'usb': True})
+        self.assertEqual(parse_power(b'\xff\xff\xff\xff\xff\x00\x00\x00'),
+                         {'soc': None, 'mv': None, 'state': 'no_audio', 'screen': 'on', 'usb': False})
+        self.assertEqual(Decoder().feed(frame(POWER, 3, payload[:7])), [])
+
+    def test_csv_log_and_drain_summary(self):
+        import csv
+        import tempfile
+        from datetime import datetime, timedelta
+        sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'companion'))
+        import battery_report
+        from protocol import record_power
+        with tempfile.TemporaryDirectory() as tmp:
+            path = pathlib.Path(tmp) / 'logs' / 'battery.csv'
+            record_power(b'\x00\x50\x10\x0f\x01\x02\x00\x00', 'ble', path)
+            record_power(b'\xff\xff\xff\xff\x01\x02\x00\x00', 'ble', path)
+            with path.open(newline='') as handle:
+                rows = list(csv.DictReader(handle))
+            self.assertEqual([r['soc'] for r in rows], ['80.0', ''])
+            self.assertEqual(rows[0]['state'], 'ready')
+            self.assertEqual(rows[0]['screen'], 'off')
+
+            start = datetime(2026, 10, 16, 12).astimezone()
+            report = pathlib.Path(tmp) / 'report.csv'
+            with report.open('w', newline='') as handle:
+                writer = csv.writer(handle)
+                writer.writerow(['time', 'transport', 'soc', 'mv', 'state', 'screen', 'usb'])
+                for minute in range(61):  # One hour off-screen, 0.05 %/min.
+                    writer.writerow([(start + timedelta(minutes=minute)).isoformat(), 'ble',
+                                     80 - minute * 0.05, 3900, 'ready', 'off', False])
+                late = start + timedelta(minutes=70)  # A 9-minute gap is not counted.
+                writer.writerow([late.isoformat(), 'ble', 70, 3800, 'recording', 'on', False])
+                writer.writerow([(late + timedelta(minutes=1)).isoformat(), 'ble', 69, 3800,
+                                 'recording', 'on', True])  # Charging is not counted.
+            totals = battery_report.summarize(battery_report.load(report))
+            self.assertEqual(list(totals), [('ready', 'off')])
+            hours, drop = totals[('ready', 'off')]
+            self.assertAlmostEqual(hours, 1.0)
+            self.assertAlmostEqual(drop, 3.0)
+
+
 if __name__ == '__main__':
     unittest.main(argv=[sys.argv[0]])

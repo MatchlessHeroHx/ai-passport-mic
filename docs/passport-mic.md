@@ -62,6 +62,16 @@ Quit. If the bridge exits unexpectedly it is restarted after 3 seconds; pairing,
 permission and BlackHole errors stop and show what to fix. The log is
 `~/Library/Logs/PassportMic/bridge.log`, rotated at 2 MB.
 
+While linked, the device sends a battery report as soon as it connects and then
+once a minute: CW2017 SOC with 1/256 % resolution, cell voltage, the device state,
+the screen level and whether a USB host is present. The bridge appends each report
+to `~/Library/Logs/PassportMic/battery.csv`. Run
+`.venv/bin/python companion/battery_report.py [--since 2026-10-16T12:00]` for drain
+per state and screen level, in % per hour and an estimated mA for the 500 mAh cell.
+It skips intervals with USB present (charging) and gaps over 3 minutes. Measure
+with USB unplugged, compare runs over the same SOC range, and treat less than about
+an hour or 0.5 % of SOC as noise. Nothing is logged while the link is down.
+
 BLE notifications add `[B5 1A][frame-id u16 LE][part-index u8][part-count u8]`.
 Payload is negotiated MTU minus nine, capped at 238 bytes. Reassembly bounds one
 656-byte frame and validates ordering and CRC. Under congestion the device skips

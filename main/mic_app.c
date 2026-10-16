@@ -25,6 +25,7 @@ static mic_screen_t screen;
 
 #define BACKLIGHT_ON 70
 #define BACKLIGHT_DIM 5
+#define POWER_REPORT_MS 60000
 
 static uint32_t now_ms(void) { return (uint32_t)(esp_timer_get_time() / 1000); }
 
@@ -41,7 +42,7 @@ static bool send_frame(uint8_t type, const void *data, uint16_t size) {
         /* Audio and the periodic state report may be skipped under radio congestion:
            the consumed sequence number tells the Mac to fill 20 ms of silence, and the
            next HELLO repeats the state. Only a lost link takes the device offline. */
-        bool droppable = type == MIC_AUDIO_ADPCM || type == MIC_HELLO;
+        bool droppable = type == MIC_AUDIO_ADPCM || type == MIC_HELLO || type == MIC_POWER;
         esp_err_t err = mic_ble_send(packet, count, droppable);
         return err == ESP_OK || (droppable && err != ESP_ERR_INVALID_STATE);
     }
@@ -97,7 +98,8 @@ void app_main(void) {
     usb_serial_jtag_driver_config_t cfg = { .tx_buffer_size = 2048, .rx_buffer_size = 256 };
     ESP_ERROR_CHECK(usb_serial_jtag_driver_install(&cfg));
     ESP_ERROR_CHECK(mic_ble_init());
-    uint32_t last_hello = 0, last_ui = 0, last_battery = 0;
+    uint32_t last_hello = 0, last_ui = 0, last_battery = 0, last_power = 0;
+    bool power_due = true;
     int battery = -1, ui_peak = 0;
     mic_screen_wake(&screen, now_ms());
     mic_screen_level_t shown_screen = MIC_SCREEN_ON;
@@ -169,6 +171,17 @@ void app_main(void) {
             uint8_t state = audio_ok ? model.state : 255;
             if (!send_frame(MIC_HELLO, &state, 1)) model.state = MIC_OFFLINE;
             last_hello = now;
+        }
+        /* One battery report as soon as a host is linked, then once a minute. */
+        if (model.state == MIC_OFFLINE) power_due = true;
+        else if (power_due || (uint32_t)(now - last_power) >= POWER_REPORT_MS) {
+            uint8_t report[MIC_POWER_SIZE];
+            mic_power_payload(report, bsp_battery_soc_q8(), bsp_battery_mv(),
+                              audio_ok ? (uint8_t)model.state : 255, (uint8_t)screen.level,
+                              usb_serial_jtag_is_connected());
+            if (!send_frame(MIC_POWER, report, sizeof(report))) model.state = MIC_OFFLINE;
+            power_due = false;
+            last_power = now;
         }
         if ((uint32_t)(now - last_battery) >= 5000) {
             battery = bsp_battery_soc();

@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'companion'))
 import passport_mic as bridge
-from protocol import HELLO, START, AUDIO, STOP, UNDO, CONFIRM, AUDIO_ADPCM
+from protocol import HELLO, START, AUDIO, STOP, UNDO, CONFIRM, AUDIO_ADPCM, POWER
 from bleak.exc import BleakError
 
 
@@ -86,6 +86,9 @@ class FakeClient:
                 def burst():
                     count = 65 if self.scenario == 'overflow' else 40 if self.scenario != 'normal' else 1
                     for _ in range(count): self.emit(AUDIO_ADPCM, bytes(164))
+                    if self.scenario == 'normal':
+                        # A battery report mid-recording is logged, never treated as a key.
+                        self.emit(POWER, b'\x00\x50\x10\x0f\x03\x00\x00\x00')
                     self.emit(STOP)
                     self.emit(UNDO)
                     self.emit(CONFIRM)
@@ -106,7 +109,9 @@ class BleSessionTests(unittest.IsolatedAsyncioTestCase):
         actions = []
         client = FakeClient(scenario)
         self.client = client
-        with patch.object(bridge, 'toggle', side_effect=lambda: actions.append('toggle')), \
+        self.power = []
+        with patch.object(bridge, 'record_power', side_effect=lambda p, t: self.power.append((p, t))), \
+             patch.object(bridge, 'toggle', side_effect=lambda: actions.append('toggle')), \
              patch.object(bridge, 'undo', side_effect=lambda: actions.append('undo')), \
              patch.object(bridge, 'confirm', side_effect=lambda: actions.append('confirm')), \
              patch.object(bridge.sd, 'OutputStream', return_value=FakeStream()):
@@ -129,6 +134,7 @@ class BleSessionTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_normal_record_stop_then_edit(self):
         self.assertEqual(await self.exercise('normal'), ['toggle', 'toggle', 'undo', 'confirm'])
+        self.assertEqual(self.power, [(b'\x00\x50\x10\x0f\x03\x00\x00\x00', 'ble')])
 
     async def test_disconnect_stops_once_and_ignores_edits(self):
         self.assertEqual(await self.exercise('disconnect'), ['toggle', 'toggle'])

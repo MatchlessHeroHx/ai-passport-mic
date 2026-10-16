@@ -15,7 +15,7 @@ import serial
 from serial.tools import list_ports
 import sounddevice as sd
 
-from protocol import AUDIO, ERROR, HELLO, START, STOP, UNDO, CONFIRM, AUDIO_ADPCM, BleFrameDecoder, Decoder, Session
+from protocol import AUDIO, ERROR, HELLO, START, STOP, UNDO, CONFIRM, AUDIO_ADPCM, POWER, BleFrameDecoder, Decoder, Session, record_power
 
 from adpcm import decode as decode_adpcm
 
@@ -144,6 +144,8 @@ def run(port, device):
                         print("正在听写…", flush=True)
                     elif kind in (AUDIO, AUDIO_ADPCM) and session.active:
                         audio.push(decode_adpcm(payload) if kind == AUDIO_ADPCM else payload)
+                    elif kind == POWER:
+                        record_power(payload, "usb")
                     elif kind == UNDO:
                         session.undo()
                         print("已发送撤销快捷键。", flush=True)
@@ -364,6 +366,8 @@ async def ble_session(client, device_index):
                             if time.monotonic() - received > 0.5:
                                 raise LinkLost("蓝牙音频等待超过 500 ms")
                             audio.push(decode_adpcm(payload) if kind == AUDIO_ADPCM else payload)
+                        elif kind == POWER:
+                            record_power(payload, "ble")
                         elif kind == UNDO and ready and not session.active:
                             await key_action(session.undo)
                             print("已发送撤销快捷键。", flush=True)

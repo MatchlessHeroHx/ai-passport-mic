@@ -1,9 +1,16 @@
 """Bounded, self-resynchronizing Passport microphone wire decoder."""
+import csv
+from datetime import datetime
+from pathlib import Path
 import struct
 import zlib
 
 MAGIC = b"FPM1"
-HELLO, START, AUDIO, STOP, ERROR, UNDO, CONFIRM, AUDIO_ADPCM = range(1, 9)
+HELLO, START, AUDIO, STOP, ERROR, UNDO, CONFIRM, AUDIO_ADPCM, POWER = range(1, 10)
+STATES = {0: "offline", 1: "ready", 2: "starting", 3: "recording", 255: "no_audio"}
+SCREENS = {0: "on", 1: "dim", 2: "off"}
+BATTERY_LOG = Path.home() / "Library/Logs/PassportMic/battery.csv"
+BATTERY_FIELDS = ["time", "transport", "soc", "mv", "state", "screen", "usb"]
 
 
 class Decoder:
@@ -25,6 +32,7 @@ class Decoder:
             valid_size = (kind == HELLO and size == 1 or
                           kind == AUDIO and size == 640 or
                           kind == AUDIO_ADPCM and size == 164 or
+                          kind == POWER and size == 8 or
                           kind in (START, STOP, ERROR, UNDO, CONFIRM) and size == 0)
             if reserved or not valid_size:
                 del self.buffer[:4]
@@ -38,6 +46,35 @@ class Decoder:
             frames.append((kind, sequence, payload))
             del self.buffer[:16 + size]
         return frames
+
+
+def parse_power(payload):
+    """Decode a battery report; None marks a reading the device could not take."""
+    soc, mv, state, screen, flags = struct.unpack("<HHBBBx", payload)
+    return {
+        "soc": None if soc == 0xFFFF else round(soc / 256, 2),
+        "mv": None if mv == 0xFFFF else mv,
+        "state": STATES.get(state, str(state)),
+        "screen": SCREENS.get(screen, str(screen)),
+        "usb": bool(flags & 1),
+    }
+
+
+def record_power(payload, transport, path=None):
+    """Append one device battery report; logging must never stop dictation."""
+    path = path or BATTERY_LOG
+    row = {"time": datetime.now().astimezone().isoformat(timespec="seconds"),
+           "transport": transport, **parse_power(payload)}
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        new = not path.exists() or path.stat().st_size == 0
+        with path.open("a", newline="") as handle:
+            writer = csv.DictWriter(handle, BATTERY_FIELDS)
+            if new:
+                writer.writeheader()
+            writer.writerow({key: "" if value is None else value for key, value in row.items()})
+    except OSError as exc:
+        print(f"电量记录写入失败：{exc}", flush=True)
 
 
 class Session:
