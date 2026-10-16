@@ -4,8 +4,9 @@
 
 更新时间：2026-10-16 10:57。工作树：`/Users/xuanhe/Documents/FoloToy/ai-passport-mic`。
 它是 `../ai-passport` 的 git worktree，分支 `feature/mac-voice-mic`，基于 `a06235e`。
-用户选择暂不提交，整个功能都未提交。用户没提之前不要提交，也不要主动建议提交；
-不要 reset、clean 或 stash pop 工作区。
+功能已提交为 `eecb9ad`，并推送到公开的 GitHub 仓库 https://github.com/MatchlessHeroHx/ai-passport-mic
+（远端 `github`，分支 `feature/mac-voice-mic`，也是那边的默认分支）。`origin` 是 FoloToy 的 Gitee 仓库，
+不要往那里推送。只在用户要求时提交或推送；不要 reset、clean 或 stash pop 工作区。
 
 ## 下一步（新会话从这里开始）
 
@@ -46,7 +47,7 @@ Mac 端桥接以菜单栏程序运行，不依赖 Agent 会话，交接时它仍
 
 2026-10-16 11:05 按用户确认做了清理：只保留最新固件、相关文档和 Mac 端软件。
 - `build/firmware/` 只剩 `20b6c8c7` 归档。所有旧固件归档、旧备份和 `build/ui` 缓存都已删除；
-  功能源码没有提交，旧版本无法恢复，也无法重新编译。
+  旧版本从未提交，无法恢复。
 - `build/ui` 由下方 LVGL 主机渲染的 configure 步骤重新生成。
 
 备份：`/Users/xuanhe/Documents/FoloToy/backups/20261016-1105-latest/` 是唯一一份，做于屏幕省电改动之后。
